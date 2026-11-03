@@ -16,13 +16,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY app/ ./app/
 COPY config/ ./config/
-COPY data/ ./data/
 
 # Create data/models directory if it doesn't exist
 RUN mkdir -p data/models
 
-# Expose port (Render sets the actual port dynamically)
+# Expose port (Railway sets the actual port dynamically via $PORT)
 EXPOSE 8000
 
 # Run the application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "$PORT"]
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

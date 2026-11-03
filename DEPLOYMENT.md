@@ -1,66 +1,63 @@
 # WebIntelX AI Deployment Guide
 
-## Security Alert - Immediate Action Required
-
-**The Groq API key was previously committed to `.env.example`. Please rotate it immediately:**
-1. Go to https://console.groq.com/keys
-2. Revoke the old key
-3. Generate a new key
-4. The new key will be added only in Render/Vercel dashboards (never committed to Git)
-
 ## Deployment Architecture
 
-- **Backend**: Render (Free Tier) - Python FastAPI with ML/CrewAI
-- **Frontend**: Vercel (Free Tier) - Next.js
+- **Backend**: Railway - Python FastAPI with ML/CrewAI
+- **Frontend**: Vercel - Next.js
 - **Database**: SQLite (ephemeral - data lost on redeploy)
+
+## Security Alert
+
+**Never commit API keys to Git.** All secrets must be set in Railway/Vercel dashboards only.
 
 ## Step 1: Push to GitHub
 
 ```powershell
 # Stage changes
 git add .
-git commit -m "Add deployment configuration
+git commit -m "Separate frontend and Python backend deployment
 
-- Added render.yaml for backend deployment
-- Added vercel.json for frontend deployment
-- Added Dockerfile for containerized deployment
-- Fixed security: removed real Groq API key from .env.example
-- Updated .env.example with production environment variables
-- Updated .gitignore to exclude .env.local files
-- Added frontend/.env.example"
+- Added .vercelignore to prevent Vercel from bundling Python backend
+- Added railway.json for Railway backend deployment
+- Updated frontend/vercel.json to remove hardcoded backend URLs
+- Updated frontend/.env.example for Railway backend
+- Updated Dockerfile for Railway compatibility
+- Deprecated render.yaml (now using Railway)
+- Updated DEPLOYMENT.md for Railway deployment"
 
 # Push to GitHub
 git push origin main
 ```
 
-## Step 2: Deploy Backend to Render
+## Step 2: Deploy Backend to Railway
 
-1. Go to https://dashboard.render.com/
-2. Click "New +" → "Web Service"
-3. Connect your GitHub repository
-4. Select the repository
-5. **Important**: Select "Existing `render.yaml`" (we created this file)
-6. Render will auto-detect the configuration
-7. Click "Create Web Service"
+1. Go to https://railway.app/new
+2. Click "Deploy from GitHub repo"
+3. Select your repository
+4. Railway will auto-detect Python/FastAPI from `railway.json`
+5. Click "Deploy"
 
-### Configure Environment Variables in Render
+### Configure Environment Variables in Railway
 
-After deployment, go to your Render service → Environment and add:
+After deployment, go to your Railway project → Variables and add:
 
 **Required (set these manually):**
-- `LLM_API_KEY` - Your new Groq API key (generate from https://console.groq.com/keys)
+- `LLM_API_KEY` - Your Groq API key (generate from https://console.groq.com/keys)
+- `CORS_ALLOWED_ORIGINS` - Add your frontend domain after Vercel deployment (e.g., `https://your-vercel-app.vercel.app,https://localhost:3000,http://localhost:3000`)
 
-**Optional (already set in render.yaml, but can override):**
-- `JWT_SECRET_KEY` - Render will auto-generate this, but you can set your own
-- `CORS_ALLOWED_ORIGINS` - Add your frontend domain after Vercel deployment
+**Optional (Railway will use defaults, but you can override):**
+- `JWT_SECRET_KEY` - Railway will auto-generate this
+- `DATABASE_URL` - Default: `sqlite:///./WebIntelXAI.db`
+- `APP_ENV` - Default: `production`
+- `DEBUG` - Default: `false`
 
-The service will be available at: `https://webintelx-backend.onrender.com`
+The service will be available at: `https://your-project-name.up.railway.app`
 
 ## Step 3: Deploy Frontend to Vercel
 
 1. Go to https://vercel.com/new
 2. Connect your GitHub repository
-3. **Important**: Set Root Directory to `frontend`
+3. **IMPORTANT**: Set Root Directory to `frontend`
 4. Vercel will auto-detect Next.js
 5. Click "Deploy"
 
@@ -69,23 +66,23 @@ The service will be available at: `https://webintelx-backend.onrender.com`
 After deployment, go to your Vercel project → Settings → Environment Variables and add:
 
 **Production Environment:**
-- `NEXT_PUBLIC_API_URL` = `https://webintelx-backend.onrender.com`
-- `NEXT_PUBLIC_WEBINTELX_SDK_URL` = `https://webintelx-backend.onrender.com/sdk/webintelx.js`
-- `NEXT_PUBLIC_INGESTION_ENDPOINT` = `https://webintelx-backend.onrender.com/api/ingest/events`
+- `NEXT_PUBLIC_API_URL` = `https://YOUR-RAILWAY-BACKEND-URL.railway.app`
+- `NEXT_PUBLIC_WEBINTELX_SDK_URL` = `https://YOUR-RAILWAY-BACKEND-URL.railway.app/sdk/webintelx.js`
+- `NEXT_PUBLIC_INGESTION_ENDPOINT` = `https://YOUR-RAILWAY-BACKEND-URL.railway.app/api/ingest/events`
 
 Then redeploy the frontend.
 
-The frontend will be available at: `https://webintelx-frontend.vercel.app` (or your custom domain)
+The frontend will be available at: `https://your-project.vercel.app` (or your custom domain)
 
-## Step 4: Update CORS in Render
+## Step 4: Update CORS in Railway
 
-After Vercel deployment, update the CORS configuration in Render:
+After Vercel deployment, update the CORS configuration in Railway:
 
-1. Go to Render → webintelx-backend → Environment
+1. Go to Railway → your project → Variables
 2. Find `CORS_ALLOWED_ORIGINS`
 3. Update to include your Vercel domain:
    ```
-   https://webintelx-frontend.vercel.app,https://localhost:3000,http://localhost:3000
+   https://your-vercel-app.vercel.app,https://localhost:3000,http://localhost:3000
    ```
 4. Save and redeploy the backend
 
@@ -93,7 +90,7 @@ After Vercel deployment, update the CORS configuration in Render:
 
 ### Backend Health Check
 ```powershell
-curl https://webintelx-backend.onrender.com/health
+curl https://YOUR-RAILWAY-BACKEND-URL.railway.app/health
 ```
 
 Expected response:
@@ -107,20 +104,20 @@ Expected response:
 ```
 
 ### Swagger Documentation
-Visit: https://webintelx-backend.onrender.com/docs
+Visit: https://YOUR-RAILWAY-BACKEND-URL.railway.app/docs
 
 ### Frontend
-Visit: https://webintelx-frontend.vercel.app
+Visit: https://your-vercel-app.vercel.app
 
 ## Step 6: End-to-End Testing
 
 ### Test 1 - Backend Health
 ```powershell
-curl https://webintelx-backend.onrender.com/health
+curl https://YOUR-RAILWAY-BACKEND-URL.railway.app/health
 ```
 
 ### Test 2 - Frontend Login
-1. Open https://webintelx-frontend.vercel.app
+1. Open https://your-vercel-app.vercel.app
 2. Register a new user
 3. Login
 
@@ -140,7 +137,7 @@ curl https://webintelx-backend.onrender.com/health
    <script>
      WebIntelX.init({
        credential: 'YOUR_CREDENTIAL_HERE',
-       endpoint: 'https://webintelx-backend.onrender.com/api/ingest/events',
+       endpoint: 'https://YOUR-RAILWAY-BACKEND-URL.railway.app/api/ingest/events',
        enabled: true,
        autoTrack: true
      });
@@ -186,7 +183,7 @@ npm run dev
 ## Deployment Limitations
 
 ### SQLite Persistence (CRITICAL)
-- **Render's free tier has ephemeral filesystem**
+- **Railway's filesystem is ephemeral**
 - **SQLite database (`WebIntelXAI.db`) is lost on every redeploy/restart**
 - **Data will persist only while the service is running**
 - This is acceptable for:
@@ -196,11 +193,11 @@ npm run dev
   - MVP validation
 - **Not suitable for production data persistence**
 
-### Render Free Tier Limitations
-- Service spins down after 15 minutes of inactivity
-- Spin-up time: ~1 minute
-- Monthly limit: 750 free instance hours
-- After 750 hours, services are suspended until next month
+### Railway Free Tier Limitations
+- Service spins down after inactivity
+- Spin-up time: varies
+- Monthly limit: 500 free hours (may change)
+- After free hours, services are suspended until next month
 - No persistent disk storage on free tier
 
 ### Vercel Free Tier Limitations
@@ -209,46 +206,44 @@ npm run dev
 - SSL included
 
 ### CrewAI/ML Limitations
-- Free tier memory: 512MB RAM
+- Free tier memory: varies by plan
 - ML models (scikit-learn) should work
 - CrewAI with Groq may have memory constraints for large investigations
 - Set `INVESTIGATION_MAX_EVENTS=50` if experiencing issues
 
 ### Groq API Key
 - **Never commit to Git**
-- Only set in Render dashboard
+- Only set in Railway dashboard
 - Monitor usage at https://console.groq.com/
 
 ## Files Changed
 
-1. **render.yaml** - New file for Render backend deployment
-2. **frontend/vercel.json** - New file for Vercel frontend deployment
-3. **Dockerfile** - New file for containerized deployment (optional)
-4. **.dockerignore** - New file to exclude unnecessary files from Docker
-5. **.env.example** - Updated with production environment variables
-6. **frontend/.env.example** - New file for frontend environment variables
-7. **.gitignore** - Updated to exclude .env.local files
-8. **frontend/.gitignore** - Updated to allow .env.example
+1. **.vercelignore** - New file to prevent Vercel from bundling Python backend
+2. **railway.json** - New file for Railway backend deployment
+3. **frontend/vercel.json** - Updated to remove hardcoded backend URLs
+4. **frontend/.env.example** - Updated for Railway backend
+5. **Dockerfile** - Updated for Railway compatibility
+6. **render.yaml** - Deprecated (now using Railway)
 
 ## Next Steps After Deployment
 
-1. **Monitor Render logs** for any startup errors
+1. **Monitor Railway logs** for any startup errors
 2. **Test health endpoint** immediately after deployment
 3. **Verify database initialization** (check logs for "init_db")
 4. **Test complete user flow** (register → login → website → events)
-5. **Check free tier usage** (Render dashboard)
+5. **Check free tier usage** (Railway dashboard)
 6. **Consider upgrade** if persistence is needed for production
 
 ## Troubleshooting
 
 ### Backend fails to start
-- Check Render logs: Dashboard → Service → Logs
+- Check Railway logs: Dashboard → Project → Logs
 - Verify `LLM_API_KEY` is set correctly
-- Check memory usage (512MB limit)
+- Check memory usage
 
 ### Frontend cannot connect to backend
 - Verify `NEXT_PUBLIC_API_URL` in Vercel environment variables
-- Check CORS configuration in Render
+- Check CORS configuration in Railway
 - Ensure backend is running (not spun down)
 
 ### SQLite database errors
@@ -260,3 +255,8 @@ npm run dev
 - Verify `LLM_API_KEY` is set
 - Check Groq API key is valid
 - Reduce `INVESTIGATION_MAX_EVENTS` if hitting memory limits
+
+### Vercel bundle size error
+- Ensure Root Directory is set to `frontend` in Vercel
+- Check that `.vercelignore` is present at repository root
+- Verify no Python files are being bundled

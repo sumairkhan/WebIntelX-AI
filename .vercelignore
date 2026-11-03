@@ -1,0 +1,23 @@
+# Ignore Python backend and dependencies
+app/
+requirements.txt
+Dockerfile
+.dockerignore
+render.yaml
+.venv/
+venv/
+__pycache__/
+*.py
+*.pyc
+*.pyo
+.pytest_cache/
+config/
+data/
+dashboard/
+scripts/
+sdk/
+tests/
+*.db
+*.sqlite
+*.joblib
+data/models/
