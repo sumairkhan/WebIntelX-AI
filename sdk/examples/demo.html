@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WebIntelX SDK Demo</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 2rem;
+      }
+      button {
+        margin: 0.5rem 0.5rem 0 0;
+        padding: 0.6rem 1rem;
+      }
+      #status {
+        background: #f5f5f5;
+        border: 1px solid #ddd;
+        padding: 1rem;
+        margin-top: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>WebIntelX SDK Demo</h1>
+
+    <script src="../src/webintelx.js"></script>
+    <script>
+      WebIntelX.init({
+        credential: 'wix_ing_demo_placeholder',
+        endpoint: 'http://127.0.0.1:8000/api/ingest/events',
+        enabled: true,
+        autoTrack: true
+      });
+
+      function updateStatus() {
+        var status = WebIntelX.getStatus();
+        document.getElementById('status').textContent = JSON.stringify(status, null, 2);
+      }
+
+      document.addEventListener('DOMContentLoaded', function () {
+        updateStatus();
+
+        document.getElementById('button-click').addEventListener('click', function () {
+          WebIntelX.track('button_click', { button: 'checkout' });
+          updateStatus();
+        });
+
+        document.getElementById('product-view').addEventListener('click', function () {
+          WebIntelX.track('product_view', { product_id: 'sku-123', category: 'security' });
+          updateStatus();
+        });
+
+        document.getElementById('flush').addEventListener('click', function () {
+          WebIntelX.flush().finally(function () {
+            updateStatus();
+          });
+        });
+      });
+    </script>
+
+    <button id="button-click">Track Button Click</button>
+    <button id="product-view">Track Product View</button>
+    <button id="flush">Flush Events</button>
+
+    <pre id="status"></pre>
+  </body>
+</html>

@@ -1,0 +1,1 @@
+"""WebIntelX AI application package."""

@@ -1,0 +1,47 @@
+{
+  "suspicious_paths": [
+    "/.env",
+    "/.git/config",
+    "/wp-admin",
+    "/wp-login.php",
+    "/phpinfo.php",
+    "/server-status"
+  ],
+  "sensitive_endpoints": [
+    "/admin",
+    "/login",
+    "/signin",
+    "/auth",
+    "/dashboard"
+  ],
+  "suspicious_user_agents": [
+    "sqlmap",
+    "nikto",
+    "nmap",
+    "masscan",
+    "zgrab",
+    "curl",
+    "wget"
+  ],
+  "suspicious_query_parameters": [
+    "cmd",
+    "exec",
+    "command",
+    "file",
+    "path",
+    "redirect",
+    "target"
+  ],
+  "auth_failure_threshold": 5,
+  "auth_failure_window_seconds": 300,
+  "request_frequency_threshold": 30,
+  "request_frequency_window_seconds": 60,
+  "unusual_methods": [
+    "PUT",
+    "PATCH",
+    "DELETE",
+    "TRACE",
+    "CONNECT",
+    "OPTIONS"
+  ]
+}
