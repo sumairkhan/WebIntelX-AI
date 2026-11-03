@@ -1,0 +1,8 @@
+[phases.build]
+cmds = ["pip install --no-cache-dir -r requirements.txt"]
+
+[phases.start]
+cmd = "python start.py"
+
+[variables]
+PORT = "8000"
