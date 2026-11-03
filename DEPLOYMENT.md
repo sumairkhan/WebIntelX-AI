@@ -227,11 +227,13 @@ npm run dev
 
 1. **.vercelignore** - New file to prevent Vercel from bundling Python backend
 2. **railway.json** - New file for Railway backend deployment
-3. **start.py** - New startup script that properly reads Railway's PORT environment variable
-4. **frontend/vercel.json** - Updated to remove hardcoded backend URLs
-5. **frontend/.env.example** - Updated for Railway backend
-6. **Dockerfile** - Updated for Railway compatibility and to use start.py
-7. **render.yaml** - Deprecated (now using Railway)
+3. **nixpacks.toml** - New file to configure NIXPACKS builder for Railway
+4. **Procfile** - New file for alternative Railway startup configuration
+5. **start.py** - New startup script that properly reads Railway's PORT environment variable
+6. **frontend/vercel.json** - Updated to remove hardcoded backend URLs
+7. **frontend/.env.example** - Updated for Railway backend
+8. **Dockerfile** - Updated for Railway compatibility and to use start.py
+9. **render.yaml** - Deprecated (now using Railway)
 
 ## Next Steps After Deployment
 
@@ -271,6 +273,7 @@ npm run dev
 
 ### Railway PORT error
 - If you see "'$PORT' is not a valid integer", the deployment should now be fixed
-- The fix uses `start.py` to properly read the PORT environment variable
+- The fix uses `nixpacks.toml` and `Procfile` to configure Railway's NIXPACKS builder
+- `start.py` properly reads the PORT environment variable
 - Railway will automatically redeploy after the git push
 - Check Railway logs to verify the server starts successfully
