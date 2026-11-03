@@ -9,6 +9,8 @@ __pycache__/
 
 # Environment files and local data
 .env
+.env.local
+.env.*.local
 *.db
 *.sqlite
 
