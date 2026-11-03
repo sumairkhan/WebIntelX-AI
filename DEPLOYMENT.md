@@ -171,6 +171,13 @@ Local development continues to work with the existing configuration:
 ```powershell
 cd "E:\Projects\WebIntelX AI"
 .venv\Scripts\activate
+python start.py
+```
+
+Or for development with hot reload:
+```powershell
+cd "E:\Projects\WebIntelX AI"
+.venv\Scripts\activate
 uvicorn app.main:app --reload --port 8000
 ```
 
@@ -220,10 +227,11 @@ npm run dev
 
 1. **.vercelignore** - New file to prevent Vercel from bundling Python backend
 2. **railway.json** - New file for Railway backend deployment
-3. **frontend/vercel.json** - Updated to remove hardcoded backend URLs
-4. **frontend/.env.example** - Updated for Railway backend
-5. **Dockerfile** - Updated for Railway compatibility
-6. **render.yaml** - Deprecated (now using Railway)
+3. **start.py** - New startup script that properly reads Railway's PORT environment variable
+4. **frontend/vercel.json** - Updated to remove hardcoded backend URLs
+5. **frontend/.env.example** - Updated for Railway backend
+6. **Dockerfile** - Updated for Railway compatibility and to use start.py
+7. **render.yaml** - Deprecated (now using Railway)
 
 ## Next Steps After Deployment
 
@@ -260,3 +268,9 @@ npm run dev
 - Ensure Root Directory is set to `frontend` in Vercel
 - Check that `.vercelignore` is present at repository root
 - Verify no Python files are being bundled
+
+### Railway PORT error
+- If you see "'$PORT' is not a valid integer", the deployment should now be fixed
+- The fix uses `start.py` to properly read the PORT environment variable
+- Railway will automatically redeploy after the git push
+- Check Railway logs to verify the server starts successfully
